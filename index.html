@@ -292,6 +292,52 @@
     }
     .tiny svg { width: 14px; height: 14px; }
     .tiny:disabled { opacity: .35; }
+    .drag-handle {
+      flex: none;
+      width: 40px;
+      height: 44px;
+      margin: -6px 0 -6px -8px;
+      display: grid;
+      place-items: center;
+      color: var(--sub);
+      border-radius: 10px;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .drag-handle svg { width: 18px; height: 18px; }
+    .habit-item {
+      align-items: center;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .habit-item.is-dragging {
+      z-index: 40;
+      box-shadow: 0 10px 28px rgba(20, 40, 36, 0.18);
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    html[data-theme="dark"] .habit-item.is-dragging {
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    }
+    .habit-placeholder {
+      background: var(--soft);
+      padding: 0;
+      border-top: 1px solid var(--border);
+    }
+    html.habit-dragging {
+      cursor: grabbing;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    html.habit-dragging,
+    html.habit-dragging body {
+      overscroll-behavior: none;
+      touch-action: none;
+    }
     .edit-btn {
       flex: none;
       min-height: 32px;
@@ -653,13 +699,14 @@
 
   var TZ = "Asia/Tokyo";
   var STORE_KEY = "task_progress_v1";
-  var VERSION = "v2026.11.14c";
+  var VERSION = "v2026.11.15a";
   var WEEKDAYS = [1, 2, 3, 4, 5];
   var WEEKENDS = [0, 6];
   var DOW_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
   var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
   var UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   var DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
+  var GRIP_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
   var LEFT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
   var RIGHT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
@@ -1181,12 +1228,9 @@
     var html = '<div class="section-h"><h2>習慣の一覧</h2><span class="sub">' + state.habits.length + "件</span></div>";
     html += '<div class="card">';
     if (!state.habits.length) html += '<div class="empty">習慣を追加すると、今日のチェックと連続日数が記録されます。</div>';
-    state.habits.forEach(function (h, idx) {
-      html += '<div class="row">';
-      html += '<div class="tiny-btns">';
-      html += '<button type="button" class="tiny" data-act="move-habit" data-id="' + escapeHtml(h.id) + '" data-dir="-1" aria-label="上へ"' + (idx === 0 ? " disabled" : "") + ">" + UP_SVG + "</button>";
-      html += '<button type="button" class="tiny" data-act="move-habit" data-id="' + escapeHtml(h.id) + '" data-dir="1" aria-label="下へ"' + (idx === state.habits.length - 1 ? " disabled" : "") + ">" + DOWN_SVG + "</button>";
-      html += "</div>";
+    state.habits.forEach(function (h) {
+      html += '<div class="row habit-item" data-id="' + escapeHtml(h.id) + '">';
+      html += '<button type="button" class="drag-handle" aria-label="並べ替え">' + GRIP_SVG + "</button>";
       html += '<div class="grow"><div class="row-title">' + escapeHtml(h.title) + "</div>";
       html += '<div class="row-meta">' + escapeHtml(scheduleLabel(h)) + " ・ 連続" + streakOf(h) + "日</div></div>";
       html += '<button type="button" class="edit-btn" data-act="edit-habit" data-id="' + escapeHtml(h.id) + '">編集</button>';
@@ -1410,6 +1454,12 @@
   }
 
   function onClick(ev) {
+    if (habitDrag.active || habitDrag.suppressClick) {
+      habitDrag.suppressClick = false;
+      ev.preventDefault();
+      ev.stopPropagation();
+      return;
+    }
     var t = ev.target.closest("[data-act], .tab-btn, #themeBtn");
     if (!t) return;
     if (t.id === "themeBtn") { cycleTheme(); return; }
@@ -1475,8 +1525,30 @@
   }
 
   var swipe = { active: false, decided: false, dx: 0, dy: 0, startX: 0, startY: 0, pointerId: null };
+  var habitDrag = {
+    active: false,
+    pending: false,
+    timer: null,
+    raf: 0,
+    id: null,
+    from: 0,
+    to: 0,
+    startX: 0,
+    startY: 0,
+    lastX: 0,
+    lastY: 0,
+    grabOffsetY: 0,
+    pointerId: null,
+    useTouch: false,
+    row: null,
+    list: null,
+    placeholder: null,
+    suppressClick: false,
+    suppressTimer: null
+  };
 
   function canStartSwipe(x, target) {
+    if (habitDrag.active || habitDrag.pending) return false;
     if (tab !== "today") return false;
     if (sheetMode !== null) return false;
     var overlay = document.getElementById("overlay");
@@ -1523,14 +1595,14 @@
     });
   }
 
-  function changeWeek(delta) {
-    setViewDate(addDays(viewDate, delta * 7));
+  function changeDay(delta) {
+    setViewDate(addDays(viewDate, delta));
     render();
     animateWeekSwitch(delta);
   }
 
   function finishSwipe() {
-    if (swipe.decided) changeWeek(swipe.dx < 0 ? 1 : -1);
+    if (swipe.decided) changeDay(swipe.dx < 0 ? 1 : -1);
     resetSwipe();
   }
 
@@ -1583,6 +1655,305 @@
     if (!swipe.active || swipe.pointerId !== e.pointerId) return;
     resetSwipe();
   }
+
+
+  function habitItemEls() {
+    return Array.prototype.slice.call(document.querySelectorAll("#page-habits .habit-item"));
+  }
+
+  function clearHabitDragTimer() {
+    if (habitDrag.timer) {
+      clearTimeout(habitDrag.timer);
+      habitDrag.timer = null;
+    }
+  }
+
+  function stopHabitAutoScroll() {
+    if (habitDrag.raf) {
+      cancelAnimationFrame(habitDrag.raf);
+      habitDrag.raf = 0;
+    }
+  }
+
+  function resetHabitDragFlags() {
+    clearHabitDragTimer();
+    stopHabitAutoScroll();
+    habitDrag.active = false;
+    habitDrag.pending = false;
+    habitDrag.id = null;
+    habitDrag.row = null;
+    habitDrag.list = null;
+    habitDrag.placeholder = null;
+    habitDrag.pointerId = null;
+    habitDrag.useTouch = false;
+    document.documentElement.classList.remove("habit-dragging");
+  }
+
+  function armClickSuppress() {
+    habitDrag.suppressClick = true;
+    if (habitDrag.suppressTimer) clearTimeout(habitDrag.suppressTimer);
+    habitDrag.suppressTimer = setTimeout(function () {
+      habitDrag.suppressClick = false;
+      habitDrag.suppressTimer = null;
+    }, 80);
+  }
+
+  function canStartHabitDrag(target) {
+    if (tab !== "habits") return false;
+    if (sheetMode !== null) return false;
+    var overlay = document.getElementById("overlay");
+    if (overlay && overlay.classList.contains("show")) return false;
+    if (state.habits.length < 2) return false;
+    if (!target || !target.closest) return false;
+    if (target.closest(".edit-btn") || target.closest('[data-act="add-habit"]')) return false;
+    return !!target.closest("#page-habits .habit-item");
+  }
+
+  function isHabitHandle(target) {
+    return !!(target && target.closest && target.closest("#page-habits .drag-handle"));
+  }
+
+  function habitPlaceholderIndex() {
+    if (!habitDrag.list || !habitDrag.placeholder) return habitDrag.from;
+    var kids = habitDrag.list.children;
+    var idx = 0;
+    for (var i = 0; i < kids.length; i++) {
+      if (kids[i] === habitDrag.placeholder) return idx;
+      if (kids[i].classList.contains("habit-item") || kids[i].classList.contains("habit-placeholder")) idx += 1;
+    }
+    return habitDrag.from;
+  }
+
+  function placeHabitPlaceholder(clientY) {
+    var list = habitDrag.list;
+    if (!list || !habitDrag.placeholder) return;
+    var nodes = Array.prototype.slice.call(list.children);
+    var before = null;
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n === habitDrag.placeholder || n === habitDrag.row) continue;
+      if (!n.classList.contains("habit-item")) continue;
+      var r = n.getBoundingClientRect();
+      if (clientY < r.top + r.height / 2) {
+        before = n;
+        break;
+      }
+    }
+    if (before) {
+      if (habitDrag.placeholder.nextElementSibling !== before) list.insertBefore(habitDrag.placeholder, before);
+    } else if (list.lastElementChild !== habitDrag.placeholder) {
+      list.appendChild(habitDrag.placeholder);
+    }
+    habitDrag.to = habitPlaceholderIndex();
+  }
+
+  function positionDragRow(clientY) {
+    if (!habitDrag.row) return;
+    habitDrag.row.style.top = (clientY - habitDrag.grabOffsetY) + "px";
+  }
+
+  function habitDragAutoScroll() {
+    habitDrag.raf = 0;
+    if (!habitDrag.active) return;
+    var y = habitDrag.lastY;
+    var vh = window.innerHeight;
+    var topZone = 72;
+    var bottomZone = 112;
+    var speed = 0;
+    if (y < topZone) speed = -Math.min(18, Math.ceil((topZone - y) / 4) + 4);
+    else if (y > vh - bottomZone) speed = Math.min(18, Math.ceil((y - (vh - bottomZone)) / 4) + 4);
+    if (speed) {
+      window.scrollBy(0, speed);
+      positionDragRow(y);
+      placeHabitPlaceholder(y);
+      habitDrag.raf = requestAnimationFrame(habitDragAutoScroll);
+    }
+  }
+
+  function startHabitDrag(x, y) {
+    clearHabitDragTimer();
+    var items = habitItemEls();
+    var row = null;
+    var from = -1;
+    items.forEach(function (el, i) {
+      if (el.getAttribute("data-id") === habitDrag.id) {
+        row = el;
+        from = i;
+      }
+    });
+    if (!row || from < 0) {
+      resetHabitDragFlags();
+      return;
+    }
+    var list = row.parentNode;
+    var rect = row.getBoundingClientRect();
+    var placeholder = document.createElement("div");
+    placeholder.className = "row habit-placeholder";
+    placeholder.style.height = rect.height + "px";
+    placeholder.setAttribute("aria-hidden", "true");
+    list.insertBefore(placeholder, row);
+
+    habitDrag.active = true;
+    habitDrag.pending = false;
+    habitDrag.from = from;
+    habitDrag.to = from;
+    habitDrag.grabOffsetY = y - rect.top;
+    habitDrag.lastX = x;
+    habitDrag.lastY = y;
+    habitDrag.row = row;
+    habitDrag.list = list;
+    habitDrag.placeholder = placeholder;
+    document.documentElement.classList.add("habit-dragging");
+
+    row.classList.add("is-dragging");
+    row.style.position = "fixed";
+    row.style.left = rect.left + "px";
+    row.style.width = rect.width + "px";
+    row.style.top = rect.top + "px";
+    row.style.zIndex = "40";
+    row.style.margin = "0";
+    row.style.pointerEvents = "none";
+    document.getElementById("app").appendChild(row);
+  }
+
+  function beginHabitPress(x, y, target, opts) {
+    var row = target.closest(".habit-item");
+    if (!row) return;
+    clearHabitDragTimer();
+    habitDrag.pending = true;
+    habitDrag.active = false;
+    habitDrag.id = row.getAttribute("data-id");
+    habitDrag.startX = x;
+    habitDrag.startY = y;
+    habitDrag.lastX = x;
+    habitDrag.lastY = y;
+    habitDrag.pointerId = opts.pointerId;
+    habitDrag.useTouch = opts.useTouch;
+    if (isHabitHandle(target)) {
+      startHabitDrag(x, y);
+    } else {
+      habitDrag.timer = setTimeout(function () {
+        habitDrag.timer = null;
+        if (!habitDrag.pending || habitDrag.active) return;
+        startHabitDrag(habitDrag.lastX, habitDrag.lastY);
+      }, 250);
+    }
+  }
+
+  function onHabitMove(x, y) {
+    habitDrag.lastX = x;
+    habitDrag.lastY = y;
+    if (habitDrag.pending && !habitDrag.active) {
+      if (Math.abs(x - habitDrag.startX) > 10 || Math.abs(y - habitDrag.startY) > 10) {
+        resetHabitDragFlags();
+      }
+      return;
+    }
+    if (!habitDrag.active) return;
+    positionDragRow(y);
+    placeHabitPlaceholder(y);
+    if (!habitDrag.raf) habitDrag.raf = requestAnimationFrame(habitDragAutoScroll);
+  }
+
+  function reorderHabits(from, to) {
+    if (from === to || from < 0 || to < 0 || from >= state.habits.length || to >= state.habits.length) return false;
+    var item = state.habits.splice(from, 1)[0];
+    state.habits.splice(to, 0, item);
+    state.habits.forEach(function (h, i) { h.order = i; });
+    saveState();
+    return true;
+  }
+
+  function finishHabitDrag() {
+    if (!habitDrag.active) {
+      resetHabitDragFlags();
+      return;
+    }
+    var from = habitDrag.from;
+    var to = habitPlaceholderIndex();
+    resetHabitDragFlags();
+    armClickSuppress();
+    reorderHabits(from, to);
+    render();
+  }
+
+  function cancelHabitDrag() {
+    if (!habitDrag.active && !habitDrag.pending) return;
+    resetHabitDragFlags();
+    armClickSuppress();
+    render();
+  }
+
+  function onTouchStartHabit(e) {
+    if (e.touches.length !== 1) {
+      if (habitDrag.active) cancelHabitDrag();
+      else resetHabitDragFlags();
+      return;
+    }
+    if (!canStartHabitDrag(e.target)) return;
+    var t = e.touches[0];
+    beginHabitPress(t.clientX, t.clientY, e.target, { pointerId: null, useTouch: true });
+    if (habitDrag.active && e.cancelable) e.preventDefault();
+  }
+
+  function onTouchMoveHabit(e) {
+    if (!habitDrag.pending && !habitDrag.active) return;
+    if (e.touches.length !== 1) return;
+    var t = e.touches[0];
+    onHabitMove(t.clientX, t.clientY);
+    if (habitDrag.active && e.cancelable) e.preventDefault();
+  }
+
+  function onTouchEndHabit() {
+    if (habitDrag.active) finishHabitDrag();
+    else if (habitDrag.pending) resetHabitDragFlags();
+  }
+
+  function onTouchCancelHabit() {
+    if (habitDrag.active || habitDrag.pending) cancelHabitDrag();
+  }
+
+  function onPointerDownHabit(e) {
+    if (e.pointerType === "touch") return;
+    if (!canStartHabitDrag(e.target)) return;
+    beginHabitPress(e.clientX, e.clientY, e.target, { pointerId: e.pointerId, useTouch: false });
+    if (habitDrag.active && e.cancelable) e.preventDefault();
+  }
+
+  function onPointerMoveHabit(e) {
+    if (habitDrag.useTouch) return;
+    if (!habitDrag.pending && !habitDrag.active) return;
+    if (habitDrag.pointerId != null && habitDrag.pointerId !== e.pointerId) return;
+    onHabitMove(e.clientX, e.clientY);
+    if (habitDrag.active && e.cancelable) e.preventDefault();
+  }
+
+  function onPointerUpHabit(e) {
+    if (habitDrag.useTouch) return;
+    if (habitDrag.pointerId != null && habitDrag.pointerId !== e.pointerId) return;
+    if (habitDrag.active) finishHabitDrag();
+    else if (habitDrag.pending) resetHabitDragFlags();
+  }
+
+  function onPointerCancelHabit(e) {
+    if (habitDrag.useTouch) return;
+    if (habitDrag.pointerId != null && habitDrag.pointerId !== e.pointerId) return;
+    if (habitDrag.active || habitDrag.pending) cancelHabitDrag();
+  }
+
+  document.addEventListener("contextmenu", function (e) {
+    if (habitDrag.active || habitDrag.pending) e.preventDefault();
+    else if (e.target && e.target.closest && e.target.closest(".drag-handle")) e.preventDefault();
+  });
+
+  document.addEventListener("touchstart", onTouchStartHabit, { passive: false });
+  document.addEventListener("touchmove", onTouchMoveHabit, { passive: false });
+  document.addEventListener("touchend", onTouchEndHabit, { passive: true });
+  document.addEventListener("touchcancel", onTouchCancelHabit, { passive: true });
+  document.addEventListener("pointerdown", onPointerDownHabit);
+  document.addEventListener("pointermove", onPointerMoveHabit, { passive: false });
+  document.addEventListener("pointerup", onPointerUpHabit);
+  document.addEventListener("pointercancel", onPointerCancelHabit);
 
   document.addEventListener("touchstart", onTouchStartSwipe, { passive: true });
   document.addEventListener("touchmove", onTouchMoveSwipe, { passive: false });
