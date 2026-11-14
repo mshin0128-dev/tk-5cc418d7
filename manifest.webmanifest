@@ -1,0 +1,17 @@
+{
+  "name": "日々のタスク",
+  "short_name": "タスク",
+  "description": "毎日の習慣チェックと、今日の予定・課題の確認",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f5f3",
+  "theme_color": "#0c7a6b",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
