@@ -442,6 +442,34 @@
     .week-cell.all .mark { background: var(--accent); }
     .week-cell.some .mark { background: var(--warn); }
     .week-cell.empty .mark { background: transparent; }
+    .week-cell.selected { background: var(--soft); border-color: var(--accent); }
+    .date-nav { margin-bottom: 8px; }
+    .date-nav h2 { font-size: 16px; text-align: center; }
+    .back-today-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 0 0 12px;
+      min-width: 0;
+    }
+    .back-today {
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--soft);
+      width: auto;
+      max-width: 100%;
+    }
+    .habit-locked { opacity: 0.45; }
+    .habit-locked .row-title,
+    .habit-locked .row-meta { color: var(--sub); }
+    .habit-locked .check:disabled {
+      cursor: default;
+      pointer-events: none;
+    }
+    .row.due-on-view { background: var(--warn-soft); }
     .filter-row {
       display: flex;
       gap: 4px;
@@ -620,18 +648,21 @@
 
   var TZ = "Asia/Tokyo";
   var STORE_KEY = "task_progress_v1";
-  var VERSION = "v2026.11.14a";
+  var VERSION = "v2026.11.14b";
   var WEEKDAYS = [1, 2, 3, 4, 5];
   var WEEKENDS = [0, 6];
   var DOW_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
   var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
   var UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   var DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
+  var LEFT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+  var RIGHT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
   var DATA = { assignments: [], events: [], sources: {}, generatedAt: null };
   var dataError = "";
   var state = loadState();
   var tab = "today";
+  var viewDate = todayYmd();
   var calCursor = monthStart(todayYmd());
   var taskFilter = "open";
   var sheetMode = null;
@@ -724,6 +755,18 @@
   function formatShortDate(s) {
     var p = s.split("-");
     return Number(p[1]) + "/" + Number(p[2]) + "（" + DOW_LABELS[weekday(s)] + "）";
+  }
+
+  function formatMonthDay(s) {
+    var p = s.split("-");
+    return Number(p[1]) + "月" + Number(p[2]) + "日（" + DOW_LABELS[weekday(s)] + "）";
+  }
+
+  function viewIsToday() { return viewDate === todayYmd(); }
+
+  function headingFor(kind) {
+    if (viewIsToday()) return "今日の" + kind;
+    return formatMonthDay(viewDate) + "の" + kind;
   }
 
   function formatTime(d) {
@@ -902,17 +945,18 @@
     return ymd(parseISO(a.due));
   }
 
-  function dueUrgency(a) {
+  function dueUrgency(a, origin) {
     var d = dueYmd(a);
-    if (!d) return { kind: "none", label: a.dueLabel || "" };
-    var today = todayYmd();
-    if (d < today) return { kind: "over", label: "期限切れ" };
-    if (d === today) return { kind: "soon", label: "本日期限" };
-    if (d === addDays(today, 1)) return { kind: "soon", label: "明日" };
+    if (!d) return { kind: "none", label: a.dueLabel || "", onView: false };
+    origin = origin || todayYmd();
+    var isToday = origin === todayYmd();
+    if (d < origin) return { kind: "over", label: "期限切れ", onView: false };
+    if (d === origin) return { kind: "soon", label: isToday ? "本日期限" : "この日期限", onView: true };
+    if (d === addDays(origin, 1)) return { kind: "soon", label: isToday ? "明日" : "翌日", onView: false };
     var n = 0;
-    var x = today;
+    var x = origin;
     while (x < d && n < 400) { x = addDays(x, 1); n += 1; }
-    return { kind: n <= 3 ? "soon" : "ok", label: "あと" + n + "日" };
+    return { kind: n <= 3 ? "soon" : "ok", label: "あと" + n + "日", onView: false };
   }
 
   function sortedAssignments() {
@@ -923,15 +967,54 @@
     });
   }
 
-  function upcomingOpen(days) {
-    var today = todayYmd();
-    var limit = addDays(today, days);
+  function upcomingOpen(days, origin) {
+    origin = origin || todayYmd();
+    var limit = addDays(origin, days);
     return sortedAssignments().filter(function (a) {
       if (isAssignmentDone(a)) return false;
       var d = dueYmd(a);
       if (!d) return true;
       return d <= limit;
     });
+  }
+
+  function eventWindow() {
+    var w = (DATA.sources && DATA.sources.calendarWindow) || {};
+    var start = w.start ? parseISO(w.start) : null;
+    var end = w.end ? parseISO(w.end) : null;
+    if (start && end) return { start: start, end: end };
+    var evs = DATA.events || [];
+    if (!evs.length) return { start: null, end: null };
+    var starts = [];
+    var ends = [];
+    evs.forEach(function (ev) {
+      var s = ev.allDay ? parseISO(ev.start) : parseISO(ev.start);
+      var e = ev.allDay ? parseISO(ev.end || ev.start) : (parseISO(ev.end) || s);
+      if (s) starts.push(s);
+      if (e) ends.push(e);
+    });
+    if (!starts.length) return { start: null, end: null };
+    starts.sort(function (a, b) { return a - b; });
+    ends.sort(function (a, b) { return a - b; });
+    return { start: starts[0], end: ends[ends.length - 1] };
+  }
+
+  function hasEventData(dateStr) {
+    var w = eventWindow();
+    if (!w.start || !w.end) return false;
+    var dayStart = new Date(dateStr + "T00:00:00+09:00");
+    var dayEnd = new Date(addDays(dateStr, 1) + "T00:00:00+09:00");
+    return dayStart < w.end && dayEnd > w.start;
+  }
+
+  function setViewDate(dateStr) {
+    if (!dateStr) return;
+    viewDate = dateStr;
+  }
+
+  function setAppbarSub(text) {
+    var el = document.getElementById("appbarSub");
+    if (el) el.textContent = text;
   }
 
   function switchTab(name) {
@@ -952,13 +1035,19 @@
     else if (tab === "habits") renderHabits();
     else if (tab === "log") renderLog();
     else renderTasks();
+    if (tab !== "today") setAppbarSub("習慣・予定・課題");
   }
 
   function habitRow(h, dateStr, opts) {
     var on = isChecked(h, dateStr);
     var st = streakOf(h);
-    var html = '<div class="row">';
-    html += '<button type="button" class="check' + (on ? " on" : "") + '" data-act="toggle-habit" data-id="' + escapeHtml(h.id) + '" data-date="' + escapeHtml(dateStr) + '" aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + escapeHtml(h.title) + (on ? " 完了" : " 未完了") + '">' + CHECK_SVG + "</button>";
+    var locked = !!(opts && opts.locked);
+    var html = '<div class="row' + (locked ? " habit-locked" : "") + '">';
+    if (locked) {
+      html += '<button type="button" class="check' + (on ? " on" : "") + '" disabled aria-disabled="true" aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + escapeHtml(h.title) + '（未来の日は記録できません）">' + CHECK_SVG + "</button>";
+    } else {
+      html += '<button type="button" class="check' + (on ? " on" : "") + '" data-act="toggle-habit" data-id="' + escapeHtml(h.id) + '" data-date="' + escapeHtml(dateStr) + '" aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + escapeHtml(h.title) + (on ? " 完了" : " 未完了") + '">' + CHECK_SVG + "</button>";
+    }
     html += '<div class="grow"><div class="row-title">' + escapeHtml(h.title) + "</div>";
     html += '<div class="row-meta">' + escapeHtml(scheduleLabel(h));
     if (st) html += " ・ 連続" + st + "日";
@@ -973,70 +1062,95 @@
   function renderToday() {
     var el = document.getElementById("page-today");
     var today = todayYmd();
-    var hs = habitsOn(today);
-    var done = hs.filter(function (h) { return isChecked(h, today); }).length;
-    var evs = eventsOn(today);
-    var asg = upcomingOpen(14);
+    if (!viewDate) viewDate = today;
+    var day = viewDate;
+    var isToday = day === today;
+    var isFuture = day > today;
+    var locked = isFuture;
+    var hs = habitsOn(day);
+    var done = hs.filter(function (h) { return isChecked(h, day); }).length;
+    var evs = eventsOn(day);
+    var hasData = hasEventData(day);
+    var asg = upcomingOpen(14, day);
+    setAppbarSub(formatLongDate(day));
     var html = "";
     if (dataError) html += '<div class="banner">' + escapeHtml(dataError) + "</div>";
-    html += '<p class="date-line">' + escapeHtml(formatLongDate(today)) + "</p>";
+
+    html += '<div class="cal-nav date-nav">';
+    html += '<button type="button" class="icon-btn" data-act="prev-day" aria-label="前の日">' + LEFT_SVG + "</button>";
+    html += "<h2>" + escapeHtml(formatMonthDay(day)) + "</h2>";
+    html += '<button type="button" class="icon-btn" data-act="next-day" aria-label="次の日">' + RIGHT_SVG + "</button>";
+    html += "</div>";
+    if (!isToday) {
+      html += '<div class="back-today-wrap"><button type="button" class="back-today" data-act="go-today">今日に戻る</button></div>';
+    }
+
     html += '<div class="stats">';
-    html += '<div class="stat"><div class="k">今日の習慣</div><div class="v">' + done + " / " + hs.length + "</div></div>";
+    html += '<div class="stat"><div class="k">' + (isToday ? "今日の習慣" : "この日の習慣") + '</div><div class="v">' + done + " / " + hs.length + "</div></div>";
     html += '<div class="stat"><div class="k">連続達成</div><div class="v">' + overallStreak() + "日</div></div>";
     html += "</div>";
 
     html += '<div class="week-strip">';
-    var start = addDays(today, -weekday(today));
+    var start = addDays(day, -weekday(day));
     for (var i = 0; i < 7; i++) {
       var d = addDays(start, i);
       var st = d > today ? "empty" : dayStatus(d);
-      html += '<button type="button" class="week-cell ' + st + (d === today ? " today" : "") + '" data-act="open-day" data-date="' + d + '">';
+      var cls = "week-cell " + st;
+      if (d === today) cls += " today";
+      if (d === day) cls += " selected";
+      html += '<button type="button" class="' + cls + '" data-act="select-day" data-date="' + d + '" aria-pressed="' + (d === day ? "true" : "false") + '" aria-label="' + escapeHtml(formatMonthDay(d)) + '">';
       html += '<div class="wd">' + DOW_LABELS[i] + '</div><div class="dn">' + Number(d.slice(8)) + '</div><div class="mark"></div></button>';
     }
     html += "</div>";
 
-    html += '<div class="section-h"><h2>今日の習慣</h2></div><div class="card">';
+    html += '<div class="section-h"><h2>' + escapeHtml(headingFor("習慣")) + "</h2>";
+    if (locked && hs.length) html += '<span class="sub">チェックできません</span>';
+    html += '</div><div class="card">';
     if (!state.habits.length) {
       html += '<div class="empty">まだ習慣がありません。</div></div>';
       html += '<div class="btn-row"><button type="button" class="primary" data-act="add-habit">習慣を追加</button></div>';
     } else if (!hs.length) {
-      html += '<div class="empty">今日は予定されている習慣がありません。</div></div>';
+      html += '<div class="empty">' + (isToday ? "今日は" : "この日は") + "予定されている習慣がありません。</div></div>";
     } else {
-      hs.forEach(function (h) { html += habitRow(h, today, {}); });
+      hs.forEach(function (h) { html += habitRow(h, day, { locked: locked }); });
       html += "</div>";
     }
 
-    html += '<div class="section-h"><h2>今日の予定</h2><span class="sub">' + evs.length + '件</span></div><div class="card">';
-    if (!evs.length) html += '<div class="empty">今日の予定はありません。</div>';
-    evs.forEach(function (ev) {
-      var p = eventTitleParts(ev);
-      html += '<div class="row"><div class="grow">';
-      html += '<div class="row-title">' + escapeHtml(p.title) + "</div>";
-      html += '<div class="row-meta">' + escapeHtml(formatTimeRange(ev, today));
-      if (ev.location) html += " ・ " + escapeHtml(ev.location);
-      html += "</div>";
-      if (p.chips.length) {
-        html += '<div class="chips">' + p.chips.map(function (c) {
-          return '<span class="chip accent">' + escapeHtml(c) + "</span>";
-        }).join("") + "</div>";
-      }
-      html += "</div></div>";
-    });
+    html += '<div class="section-h"><h2>' + escapeHtml(headingFor("予定")) + '</h2><span class="sub">' + (hasData ? evs.length + "件" : "") + '</span></div><div class="card">';
+    if (!hasData) html += '<div class="empty">予定データがありません</div>';
+    else if (!evs.length) html += '<div class="empty">' + (isToday ? "今日の予定はありません。" : "この日の予定はありません。") + "</div>";
+    if (hasData) {
+      evs.forEach(function (ev) {
+        var p = eventTitleParts(ev);
+        html += '<div class="row"><div class="grow">';
+        html += '<div class="row-title">' + escapeHtml(p.title) + "</div>";
+        html += '<div class="row-meta">' + escapeHtml(formatTimeRange(ev, day));
+        if (ev.location) html += " ・ " + escapeHtml(ev.location);
+        html += "</div>";
+        if (p.chips.length) {
+          html += '<div class="chips">' + p.chips.map(function (c) {
+            return '<span class="chip accent">' + escapeHtml(c) + "</span>";
+          }).join("") + "</div>";
+        }
+        html += "</div></div>";
+      });
+    }
     html += "</div>";
 
     html += '<div class="section-h"><h2>締切が近い課題</h2><span class="sub">14日以内</span></div><div class="card">';
     if (!asg.length) html += '<div class="empty">直近の未提出課題はありません。</div>';
-    asg.forEach(function (a) { html += assignmentRow(a, true); });
+    asg.forEach(function (a) { html += assignmentRow(a, true, day); });
     html += "</div>";
     el.innerHTML = html;
   }
 
-  function assignmentRow(a, compact) {
+  function assignmentRow(a, compact, origin) {
     var done = isAssignmentDone(a);
     var srcDone = a.sourceStatus === "submitted";
-    var urg = dueUrgency(a);
+    origin = origin || todayYmd();
+    var urg = dueUrgency(a, origin);
     var urgClass = urg.kind === "over" ? "due-over" : urg.kind === "soon" ? "due-soon" : "";
-    var html = '<div class="row">';
+    var html = '<div class="row' + (urg.onView && !done ? " due-on-view" : "") + '">';
     if (srcDone) {
       html += '<span class="check on" aria-label="提出済み">' + CHECK_SVG + "</span>";
     } else {
@@ -1346,6 +1460,10 @@
       return;
     }
     if (act === "open-day") { openDay(t.getAttribute("data-date")); return; }
+    if (act === "select-day") { setViewDate(t.getAttribute("data-date")); render(); return; }
+    if (act === "prev-day") { setViewDate(addDays(viewDate, -1)); render(); return; }
+    if (act === "next-day") { setViewDate(addDays(viewDate, 1)); render(); return; }
+    if (act === "go-today") { setViewDate(todayYmd()); render(); return; }
     if (act === "cal-prev") { calCursor = addMonths(calCursor, -1); render(); return; }
     if (act === "cal-next") { calCursor = addMonths(calCursor, 1); render(); return; }
     if (act === "task-filter") { taskFilter = t.getAttribute("data-filter"); render(); return; }
