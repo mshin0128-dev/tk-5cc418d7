@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T20:44:26+09:00",
+  "generatedAt": "2026-11-15T06:49:50+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -222,33 +222,6 @@
     }
   ],
   "events": [
-    {
-      "id": "vaqa601m19070k6gsj98a46pd0",
-      "title": "ゼミ 検討会（桂）",
-      "start": "2026-11-13T13:00:00+09:00",
-      "end": "2026-11-13T15:00:00+09:00",
-      "allDay": false,
-      "location": "桂キャンパス",
-      "kind": "seminar"
-    },
-    {
-      "id": "lkjdf8p4pdv0siim048degpbvg",
-      "title": "[授業] 建築生産Ⅱ 現場見学会（うめきた2期）",
-      "start": "2026-11-13T13:20:00+09:00",
-      "end": "2026-11-13T15:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "t9f4kgmjbrit25rvmioigpb8mo",
-      "title": "一蘭 バイト",
-      "start": "2026-11-13T22:00:00+09:00",
-      "end": "2026-11-14T06:00:00+09:00",
-      "allDay": false,
-      "location": "一蘭",
-      "kind": "work"
-    },
     {
       "id": "82mfnlc3q7t5s7v9ekamf3m7jc",
       "title": "一蘭 バイト",
