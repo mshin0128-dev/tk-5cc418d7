@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T06:49:50+09:00",
+  "generatedAt": "2026-11-16T07:07:33+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -222,15 +222,6 @@
     }
   ],
   "events": [
-    {
-      "id": "82mfnlc3q7t5s7v9ekamf3m7jc",
-      "title": "一蘭 バイト",
-      "start": "2026-11-14T22:00:00+09:00",
-      "end": "2026-11-15T06:00:00+09:00",
-      "allDay": false,
-      "location": "一蘭",
-      "kind": "work"
-    },
     {
       "id": "u6dhsh7t8j907irgvdds4vim90",
       "title": "焼肉",
