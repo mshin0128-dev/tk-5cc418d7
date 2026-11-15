@@ -699,7 +699,7 @@
 
   var TZ = "Asia/Tokyo";
   var STORE_KEY = "task_progress_v1";
-  var VERSION = "v2026.11.15a";
+  var VERSION = "v2026.11.15b";
   var WEEKDAYS = [1, 2, 3, 4, 5];
   var WEEKENDS = [0, 6];
   var DOW_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -1082,10 +1082,18 @@
     window.scrollTo(0, 0);
   }
 
+  function cleanupStrayHabitDragNodes() {
+    if (habitDrag.active) return;
+    var strays = document.querySelectorAll(".habit-item.is-dragging, .habit-placeholder");
+    strays.forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+  }
+
   function render() {
+    cleanupStrayHabitDragNodes();
     if (tab === "today") renderToday();
-    else if (tab === "habits") renderHabits();
-    else if (tab === "log") renderLog();
+    else if (tab === "habits") {
+      if (!habitDrag.active) renderHabits();
+    } else if (tab === "log") renderLog();
     else renderTasks();
     if (tab !== "today") setAppbarSub("習慣・予定・課題");
   }
@@ -1678,6 +1686,8 @@
   function resetHabitDragFlags() {
     clearHabitDragTimer();
     stopHabitAutoScroll();
+    if (habitDrag.row && habitDrag.row.parentNode) habitDrag.row.parentNode.removeChild(habitDrag.row);
+    if (habitDrag.placeholder && habitDrag.placeholder.parentNode) habitDrag.placeholder.parentNode.removeChild(habitDrag.placeholder);
     habitDrag.active = false;
     habitDrag.pending = false;
     habitDrag.id = null;
@@ -1954,6 +1964,13 @@
   document.addEventListener("pointermove", onPointerMoveHabit, { passive: false });
   document.addEventListener("pointerup", onPointerUpHabit);
   document.addEventListener("pointercancel", onPointerCancelHabit);
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && (habitDrag.active || habitDrag.pending)) cancelHabitDrag();
+  });
+  window.addEventListener("pagehide", function () {
+    if (habitDrag.active || habitDrag.pending) cancelHabitDrag();
+  });
 
   document.addEventListener("touchstart", onTouchStartSwipe, { passive: true });
   document.addEventListener("touchmove", onTouchMoveSwipe, { passive: false });
