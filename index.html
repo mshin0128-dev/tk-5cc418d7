@@ -593,6 +593,61 @@
       outline: none;
     }
     input[type="text"]:focus { border-color: var(--accent); }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-size: 16px;
+      outline: none;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      resize: vertical;
+    }
+    textarea:focus { border-color: var(--accent); }
+    .habit-memo {
+      font-size: 13px;
+      color: var(--text);
+      margin-top: 6px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .memo-link {
+      color: var(--accent);
+      text-decoration: underline;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .memo-preview {
+      font-size: 14px;
+      color: var(--text);
+      background: var(--soft);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin: 0 0 12px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .memo-btn {
+      flex: none;
+      width: 36px;
+      height: 36px;
+      margin-top: 2px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--sub);
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .memo-btn svg { width: 16px; height: 16px; }
+    .memo-btn.is-filled {
+      color: var(--accent);
+      background: var(--soft);
+      border-color: var(--accent);
+    }
     .choice-grid, .dow-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -699,7 +754,7 @@
 
   var TZ = "Asia/Tokyo";
   var STORE_KEY = "task_progress_v1";
-  var VERSION = "v2026.11.15b";
+  var VERSION = "v2026.11.17a";
   var WEEKDAYS = [1, 2, 3, 4, 5];
   var WEEKENDS = [0, 6];
   var DOW_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -709,6 +764,7 @@
   var GRIP_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
   var LEFT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
   var RIGHT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var MEMO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h6l4 4v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg>';
 
   var DATA = { assignments: [], events: [], sources: {}, generatedAt: null };
   var dataError = "";
@@ -719,6 +775,7 @@
   var taskFilter = "open";
   var sheetMode = null;
   var editingHabitId = null;
+  var memoEditingId = null;
   var pendingDeleteId = null;
   var formDraft = null;
 
@@ -730,6 +787,9 @@
       var s = JSON.parse(raw);
       if (!s || typeof s !== "object") return empty;
       if (!Array.isArray(s.habits)) s.habits = [];
+      s.habits.forEach(function (h) {
+        if (h && typeof h.memo !== "string") h.memo = "";
+      });
       if (!s.checks || typeof s.checks !== "object") s.checks = {};
       if (!s.assignmentDone || typeof s.assignmentDone !== "object") s.assignmentDone = {};
       if (!s.themePref) s.themePref = "system";
@@ -749,6 +809,33 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  var MEMO_URL_RE = /\bhttps?:\/\/[^\s<>"']+/gi;
+  var MEMO_TRAIL_CHARS = ".,;:!?)]}。、」】』〉）";
+
+  function linkifyMemo(text) {
+    var s = String(text == null ? "" : text);
+    var html = "";
+    var last = 0;
+    var m;
+    MEMO_URL_RE.lastIndex = 0;
+    while ((m = MEMO_URL_RE.exec(s))) {
+      var raw = m[0];
+      var start = m.index;
+      var trail = "";
+      while (raw.length && MEMO_TRAIL_CHARS.indexOf(raw.charAt(raw.length - 1)) !== -1) {
+        trail = raw.charAt(raw.length - 1) + trail;
+        raw = raw.slice(0, -1);
+      }
+      if (!raw) continue;
+      html += escapeHtml(s.slice(last, start));
+      html += '<a class="memo-link" href="' + escapeHtml(raw) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(raw) + "</a>";
+      html += escapeHtml(trail);
+      last = start + m[0].length;
+    }
+    html += escapeHtml(s.slice(last));
+    return html.replace(/\n/g, "<br>");
   }
 
   function todayDate() { return new Date(); }
@@ -1102,6 +1189,7 @@
     var on = isChecked(h, dateStr);
     var st = streakOf(h);
     var locked = !!(opts && opts.locked);
+    var memo = typeof h.memo === "string" ? h.memo : "";
     var html = '<div class="row' + (locked ? " habit-locked" : "") + '">';
     if (locked) {
       html += '<button type="button" class="check' + (on ? " on" : "") + '" disabled aria-disabled="true" aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + escapeHtml(h.title) + '（未来の日は記録できません）">' + CHECK_SVG + "</button>";
@@ -1111,10 +1199,15 @@
     html += '<div class="grow"><div class="row-title">' + escapeHtml(h.title) + "</div>";
     html += '<div class="row-meta">' + escapeHtml(scheduleLabel(h));
     if (st) html += " ・ 連続" + st + "日";
-    html += "</div></div>";
+    html += "</div>";
+    if (memo) {
+      html += '<div class="habit-memo">' + linkifyMemo(memo) + "</div>";
+    }
+    html += "</div>";
     if (opts && opts.edit) {
       html += '<button type="button" class="edit-btn" data-act="edit-habit" data-id="' + escapeHtml(h.id) + '">編集</button>';
     }
+    html += '<button type="button" class="memo-btn' + (memo ? " is-filled" : "") + '" data-act="open-memo" data-id="' + escapeHtml(h.id) + '" aria-label="メモ">' + MEMO_SVG + "</button>";
     html += "</div>";
     return html;
   }
@@ -1328,6 +1421,7 @@
     ov.setAttribute("aria-hidden", "true");
     sheetMode = null;
     editingHabitId = null;
+    memoEditingId = null;
     pendingDeleteId = null;
     formDraft = null;
   }
@@ -1348,10 +1442,13 @@
     var title = h ? h.title : "";
     var schedule = h ? h.schedule : "daily";
     var days = h ? habitDays(h) : [0, 1, 2, 3, 4, 5, 6];
+    var memo = h && typeof h.memo === "string" ? h.memo : "";
     formDraft = { schedule: schedule, days: days.slice() };
     var html = '<h3 id="sheetTitle">' + (h ? "習慣を編集" : "習慣を追加") + "</h3>";
     html += '<label class="fld" for="habitName">名前</label>';
     html += '<input type="text" id="habitName" maxlength="40" value="' + escapeHtml(title) + '" placeholder="例: 単語帳を1セット" enterkeyhint="done">';
+    html += '<label class="fld" for="habitMemo">メモ</label>';
+    html += '<textarea id="habitMemo" rows="4" maxlength="2000" placeholder="リンクやメモを書けます">' + escapeHtml(memo) + "</textarea>";
     html += '<div class="fld">繰り返す日</div>';
     html += '<div class="choice-grid" id="habitSchedule">';
     [["daily", "毎日"], ["weekdays", "平日のみ"], ["weekends", "土日のみ"], ["custom", "曜日を指定"]].forEach(function (p) {
@@ -1414,6 +1511,8 @@
     var nameEl = document.getElementById("habitName");
     var title = (nameEl && nameEl.value || "").trim();
     if (!title) { toast("名前を入力してください"); if (nameEl) nameEl.focus(); return; }
+    var memoEl = document.getElementById("habitMemo");
+    var memo = (memoEl && memoEl.value || "").trim().slice(0, 2000);
     var schedule = formDraft ? formDraft.schedule : "daily";
     var days = formDraft ? formDraft.days.slice() : [0, 1, 2, 3, 4, 5, 6];
     if (schedule === "custom" && !days.length) { toast("曜日を1つ以上選んでください"); return; }
@@ -1423,6 +1522,7 @@
           h.title = title;
           h.schedule = schedule;
           h.days = days;
+          h.memo = memo;
         }
       });
     } else {
@@ -1431,10 +1531,39 @@
         title: title,
         schedule: schedule,
         days: days,
+        memo: memo,
         createdAt: new Date().toISOString(),
         order: state.habits.length
       });
     }
+    saveState();
+    closeSheet();
+    render();
+    toast("保存しました");
+  }
+
+  function openMemoSheet(id) {
+    var h = state.habits.filter(function (x) { return x.id === id; })[0];
+    if (!h) return;
+    memoEditingId = id;
+    var memo = typeof h.memo === "string" ? h.memo : "";
+    var html = '<h3 id="sheetTitle">' + escapeHtml(h.title) + "のメモ</h3>";
+    if (memo) {
+      html += '<div class="memo-preview">' + linkifyMemo(memo) + "</div>";
+    }
+    html += '<label class="fld" for="habitMemo">メモ</label>';
+    html += '<textarea id="habitMemo" rows="6" maxlength="2000" placeholder="リンクやメモを書けます">' + escapeHtml(memo) + "</textarea>";
+    html += '<div class="btn-row"><button type="button" class="secondary" data-act="close-sheet">やめる</button>';
+    html += '<button type="button" class="primary" data-act="save-memo">保存</button></div>';
+    openSheet(html, "memo");
+  }
+
+  function saveMemo() {
+    var h = state.habits.filter(function (x) { return x.id === memoEditingId; })[0];
+    if (!h) { closeSheet(); return; }
+    var memoEl = document.getElementById("habitMemo");
+    var memo = (memoEl && memoEl.value || "").trim().slice(0, 2000);
+    h.memo = memo;
     saveState();
     closeSheet();
     render();
@@ -1462,6 +1591,7 @@
   }
 
   function onClick(ev) {
+    if (ev.target.closest && ev.target.closest("a.memo-link")) return;
     if (habitDrag.active || habitDrag.suppressClick) {
       habitDrag.suppressClick = false;
       ev.preventDefault();
@@ -1495,6 +1625,8 @@
     if (act === "add-habit") { openHabitEditor(null); return; }
     if (act === "edit-habit") { openHabitEditor(t.getAttribute("data-id")); return; }
     if (act === "save-habit") { saveHabit(); return; }
+    if (act === "open-memo") { openMemoSheet(t.getAttribute("data-id")); return; }
+    if (act === "save-memo") { saveMemo(); return; }
     if (act === "close-sheet") { closeSheet(); return; }
     if (act === "ask-delete") { openConfirmDelete(t.getAttribute("data-id")); return; }
     if (act === "cancel-delete") { openHabitEditor(t.getAttribute("data-id") || pendingDeleteId); return; }
@@ -1568,6 +1700,7 @@
     }
     if (x < 24 || x > window.innerWidth - 24) return false;
     if (target && target.closest && target.closest("#tabbar")) return false;
+    if (target && target.closest && (target.closest("a.memo-link") || target.closest("textarea"))) return false;
     return true;
   }
 
