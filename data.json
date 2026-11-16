@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T19:00:42+09:00",
+  "generatedAt": "2026-11-17T06:43:01+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -222,33 +222,6 @@
     }
   ],
   "events": [
-    {
-      "id": "u6dhsh7t8j907irgvdds4vim90",
-      "title": "焼肉",
-      "start": "2026-11-15T18:00:00+09:00",
-      "end": "2026-11-15T20:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "other"
-    },
-    {
-      "id": "lc7lnk6mmhp9vefemlv46dt720_20261115T234500Z",
-      "title": "[授業] 数理統計（月1）",
-      "start": "2026-11-16T08:45:00+09:00",
-      "end": "2026-11-16T10:15:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "7l1o5os1v2afq13fursordntng_20261116T013000Z",
-      "title": "[授業] 鉄骨構造Ⅱ（月2）",
-      "start": "2026-11-16T10:30:00+09:00",
-      "end": "2026-11-16T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
     {
       "id": "1i68rtn3ajhmss7o1ke22de57o_20261116T041500Z",
       "title": "[授業] 鉄筋コンクリート構造Ⅱ（RC）（月3）",
