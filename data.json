@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T06:43:01+09:00",
+  "generatedAt": "2026-11-17T09:45:38+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -188,6 +188,17 @@
       "sourceStatusLabel": "未提出（11/13 8:45公開。感想必須・質問任意）"
     },
     {
+      "id": "1748bc2ed664",
+      "course": "建築生産Ⅱ",
+      "title": "質問・コメント票フォーム（11/17分）",
+      "due": "2026-11-18T23:59:00+09:00",
+      "dueLabel": "11/18(水) 23:59",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出"
+    },
+    {
       "id": "f24511c58363",
       "course": "統計入門",
       "title": "統計入門クイズ06（KULMSテスト・クイズ）",
@@ -197,6 +208,17 @@
       "inClass": false,
       "sourceStatus": "open",
       "sourceStatusLabel": "未提出（11/13確認で公開・受験可能）"
+    },
+    {
+      "id": "2ccf12ded4be",
+      "course": "建築生産Ⅱ",
+      "title": "質問・コメント票フォーム（11/24分）",
+      "due": "2026-11-25T23:59:00+09:00",
+      "dueLabel": "11/25(水) 23:59",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出"
     },
     {
       "id": "900a0d96692d",
@@ -210,6 +232,28 @@
       "sourceStatusLabel": "未提出（11/13確認で公開・受験可能）"
     },
     {
+      "id": "2640cdea8d54",
+      "course": "鉄骨構造Ⅱ",
+      "title": "HW3（紙提出、11/16出題）",
+      "due": "2026-11-30T10:30:00+09:00",
+      "dueLabel": "11/30(月) 10:30（暫定・正確な締切は未確認）",
+      "dueNote": "暫定・正確な締切は未確認",
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出"
+    },
+    {
+      "id": "2bf4f7d93e33",
+      "course": "建築生産Ⅱ",
+      "title": "質問・コメント票フォーム（12/1分）",
+      "due": "2026-12-02T23:59:00+09:00",
+      "dueLabel": "12/2(水) 23:59",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出"
+    },
+    {
       "id": "79cdc6723069",
       "course": "統計入門",
       "title": "中間レポート（KULMS課題）",
@@ -219,6 +263,17 @@
       "inClass": false,
       "sourceStatus": "open",
       "sourceStatusLabel": "未提出（11/13 8:45公開、OPEN。PDF提出・再提出可）"
+    },
+    {
+      "id": "798366cd6b41",
+      "course": "建築生産Ⅱ",
+      "title": "質問・コメント票フォーム（12/8分）",
+      "due": "2026-12-09T23:59:00+09:00",
+      "dueLabel": "12/9(水) 23:59",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出"
     }
   ],
   "events": [
