@@ -754,7 +754,7 @@
 
   var TZ = "Asia/Tokyo";
   var STORE_KEY = "task_progress_v1";
-  var VERSION = "v2026.11.17a";
+  var VERSION = "v2026.11.17b";
   var WEEKDAYS = [1, 2, 3, 4, 5];
   var WEEKENDS = [0, 6];
   var DOW_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -776,11 +776,12 @@
   var sheetMode = null;
   var editingHabitId = null;
   var memoEditingId = null;
+  var courseMemoEditingKey = null;
   var pendingDeleteId = null;
   var formDraft = null;
 
   function loadState() {
-    var empty = { habits: [], checks: {}, assignmentDone: {}, themePref: "system" };
+    var empty = { habits: [], checks: {}, assignmentDone: {}, themePref: "system", courseMemos: {}, courseMemoTouched: {} };
     try {
       var raw = localStorage.getItem(STORE_KEY);
       if (!raw) return empty;
@@ -793,6 +794,8 @@
       if (!s.checks || typeof s.checks !== "object") s.checks = {};
       if (!s.assignmentDone || typeof s.assignmentDone !== "object") s.assignmentDone = {};
       if (!s.themePref) s.themePref = "system";
+      if (!s.courseMemos || typeof s.courseMemos !== "object") s.courseMemos = {};
+      if (!s.courseMemoTouched || typeof s.courseMemoTouched !== "object") s.courseMemoTouched = {};
       return s;
     } catch (e) {
       return empty;
@@ -801,6 +804,21 @@
 
   function saveState() {
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+
+  var DEFAULT_COURSE_MEMOS = {
+    "建築生産Ⅱ": "質問・コメント票（授業翌日まで）\nhttps://docs.google.com/forms/d/e/1FAIpQLSdfLMogN94QSnJTcyMiBMGfCfYe22htuBlANRfHbwBp1czxZw/viewform"
+  };
+
+  function getCourseMemo(key) {
+    if (!key) return "";
+    if (state.courseMemoTouched[key]) {
+      var touchedMemo = state.courseMemos[key];
+      return typeof touchedMemo === "string" ? touchedMemo : "";
+    }
+    if (Object.prototype.hasOwnProperty.call(DEFAULT_COURSE_MEMOS, key)) return DEFAULT_COURSE_MEMOS[key];
+    var memo = state.courseMemos[key];
+    return typeof memo === "string" ? memo : "";
   }
 
   function escapeHtml(s) {
@@ -1060,6 +1078,55 @@
     return { title: t, chips: chips };
   }
 
+  var CLASS_PREFIX_RE = /^\[授業\]\s*/;
+  var CLASS_SLOT_SUFFIX_RE = /（[日月火水木金土]\d+）$/;
+
+  function cleanCourseTitle(title) {
+    var t = String(title || "");
+    t = t.replace(CLASS_PREFIX_RE, "");
+    t = t.replace(/^〆\s*/, "");
+    t = t.replace(CLASS_SLOT_SUFFIX_RE, "");
+    return t.trim();
+  }
+
+  var courseNameCache = { data: null, names: null };
+
+  function knownCourseNames() {
+    if (courseNameCache.data === DATA) return courseNameCache.names;
+    var set = {};
+    (DATA.assignments || []).forEach(function (a) {
+      if (a.course) set[a.course] = true;
+    });
+    (DATA.events || []).forEach(function (ev) {
+      var t = String(ev.title || "");
+      if (!CLASS_PREFIX_RE.test(t)) return;
+      var rest = t.replace(CLASS_PREFIX_RE, "");
+      if (rest.charAt(0) === "〆") return;
+      var m = rest.match(CLASS_SLOT_SUFFIX_RE);
+      if (!m) return;
+      var name = rest.slice(0, rest.length - m[0].length).trim();
+      if (name) set[name] = true;
+    });
+    var names = Object.keys(set);
+    names.sort(function (a, b) { return b.length - a.length; });
+    courseNameCache = { data: DATA, names: names };
+    return names;
+  }
+
+  function courseKeyOf(item) {
+    if (!item) return "";
+    var course = typeof item.course === "string" ? item.course : "";
+    var titleRaw = typeof item.title === "string" ? item.title : "";
+    var cleanedTitle = cleanCourseTitle(titleRaw);
+    var hay = course + " " + titleRaw + " " + cleanedTitle;
+    var names = knownCourseNames();
+    for (var i = 0; i < names.length; i++) {
+      if (hay.indexOf(names[i]) !== -1) return names[i];
+    }
+    if (course) return course;
+    return cleanedTitle || titleRaw;
+  }
+
   function formatTimeRange(ev, dateStr) {
     if (ev.allDay) return "終日";
     var s = parseISO(ev.start);
@@ -1212,6 +1279,31 @@
     return html;
   }
 
+  function eventRow(ev, dateStr) {
+    var p = eventTitleParts(ev);
+    var key = courseKeyOf(ev);
+    var memo = key ? getCourseMemo(key) : "";
+    var html = '<div class="row"><div class="grow">';
+    html += '<div class="row-title">' + escapeHtml(p.title) + "</div>";
+    html += '<div class="row-meta">' + escapeHtml(formatTimeRange(ev, dateStr));
+    if (ev.location) html += " ・ " + escapeHtml(ev.location);
+    html += "</div>";
+    if (p.chips.length) {
+      html += '<div class="chips">' + p.chips.map(function (c) {
+        return '<span class="chip accent">' + escapeHtml(c) + "</span>";
+      }).join("") + "</div>";
+    }
+    if (memo) {
+      html += '<div class="habit-memo">' + linkifyMemo(memo) + "</div>";
+    }
+    html += "</div>";
+    if (key) {
+      html += '<button type="button" class="memo-btn' + (memo ? " is-filled" : "") + '" data-act="open-course-memo" data-course="' + escapeHtml(key) + '" aria-label="メモ">' + MEMO_SVG + "</button>";
+    }
+    html += "</div>";
+    return html;
+  }
+
   function renderToday() {
     var el = document.getElementById("page-today");
     var today = todayYmd();
@@ -1273,20 +1365,7 @@
     if (!hasData) html += '<div class="empty">予定データがありません</div>';
     else if (!evs.length) html += '<div class="empty">' + (isToday ? "今日の予定はありません。" : "この日の予定はありません。") + "</div>";
     if (hasData) {
-      evs.forEach(function (ev) {
-        var p = eventTitleParts(ev);
-        html += '<div class="row"><div class="grow">';
-        html += '<div class="row-title">' + escapeHtml(p.title) + "</div>";
-        html += '<div class="row-meta">' + escapeHtml(formatTimeRange(ev, day));
-        if (ev.location) html += " ・ " + escapeHtml(ev.location);
-        html += "</div>";
-        if (p.chips.length) {
-          html += '<div class="chips">' + p.chips.map(function (c) {
-            return '<span class="chip accent">' + escapeHtml(c) + "</span>";
-          }).join("") + "</div>";
-        }
-        html += "</div></div>";
-      });
+      evs.forEach(function (ev) { html += eventRow(ev, day); });
     }
     html += "</div>";
 
@@ -1303,6 +1382,8 @@
     origin = origin || todayYmd();
     var urg = dueUrgency(a, origin);
     var urgClass = urg.kind === "over" ? "due-over" : urg.kind === "soon" ? "due-soon" : "";
+    var key = courseKeyOf(a);
+    var memo = key ? getCourseMemo(key) : "";
     var html = '<div class="row' + (urg.onView && !done ? " due-on-view" : "") + '">';
     if (srcDone) {
       html += '<span class="check on" aria-label="提出済み">' + CHECK_SVG + "</span>";
@@ -1320,7 +1401,15 @@
     if (!srcDone) html += '<span class="chip ' + (urg.kind === "over" ? "danger" : urg.kind === "soon" ? "warn" : "") + ' ' + urgClass + '">' + escapeHtml(urg.label) + "</span>";
     if (srcDone) html += '<span class="chip accent">授業管理で提出済み</span>';
     else if (done) html += '<span class="chip accent">完了にしました</span>';
-    html += "</div></div></div>";
+    html += "</div>";
+    if (memo) {
+      html += '<div class="habit-memo">' + linkifyMemo(memo) + "</div>";
+    }
+    html += "</div>";
+    if (key) {
+      html += '<button type="button" class="memo-btn' + (memo ? " is-filled" : "") + '" data-act="open-course-memo" data-course="' + escapeHtml(key) + '" aria-label="メモ">' + MEMO_SVG + "</button>";
+    }
+    html += "</div>";
     return html;
   }
 
@@ -1422,6 +1511,7 @@
     sheetMode = null;
     editingHabitId = null;
     memoEditingId = null;
+    courseMemoEditingKey = null;
     pendingDeleteId = null;
     formDraft = null;
   }
@@ -1491,13 +1581,7 @@
     html += "</div>";
     html += '<div class="section-h"><h2>予定</h2></div><div class="card">';
     if (!evs.length) html += '<div class="empty">この日の予定はありません。</div>';
-    evs.forEach(function (ev) {
-      var p = eventTitleParts(ev);
-      html += '<div class="row"><div class="grow"><div class="row-title">' + escapeHtml(p.title) + "</div>";
-      html += '<div class="row-meta">' + escapeHtml(formatTimeRange(ev, dateStr));
-      if (ev.location) html += " ・ " + escapeHtml(ev.location);
-      html += "</div></div></div>";
-    });
+    evs.forEach(function (ev) { html += eventRow(ev, dateStr); });
     html += "</div>";
     html += '<div class="btn-row"><button type="button" class="secondary" data-act="close-sheet">閉じる</button></div>';
     openSheet(html, "day");
@@ -1570,6 +1654,34 @@
     toast("保存しました");
   }
 
+  function openCourseMemoSheet(key) {
+    if (!key) return;
+    courseMemoEditingKey = key;
+    var memo = getCourseMemo(key);
+    var html = '<h3 id="sheetTitle">' + escapeHtml(key) + "のメモ</h3>";
+    if (memo) {
+      html += '<div class="memo-preview">' + linkifyMemo(memo) + "</div>";
+    }
+    html += '<label class="fld" for="courseMemo">メモ</label>';
+    html += '<textarea id="courseMemo" rows="6" maxlength="2000" placeholder="リンクやメモを書けます">' + escapeHtml(memo) + "</textarea>";
+    html += '<div class="btn-row"><button type="button" class="secondary" data-act="close-sheet">やめる</button>';
+    html += '<button type="button" class="primary" data-act="save-course-memo">保存</button></div>';
+    openSheet(html, "course-memo");
+  }
+
+  function saveCourseMemo() {
+    var key = courseMemoEditingKey;
+    if (!key) { closeSheet(); return; }
+    var memoEl = document.getElementById("courseMemo");
+    var memo = (memoEl && memoEl.value || "").trim().slice(0, 2000);
+    state.courseMemos[key] = memo;
+    state.courseMemoTouched[key] = true;
+    saveState();
+    closeSheet();
+    render();
+    toast("保存しました");
+  }
+
   function deleteHabit(id) {
     state.habits = state.habits.filter(function (h) { return h.id !== id; });
     delete state.checks[id];
@@ -1627,6 +1739,8 @@
     if (act === "save-habit") { saveHabit(); return; }
     if (act === "open-memo") { openMemoSheet(t.getAttribute("data-id")); return; }
     if (act === "save-memo") { saveMemo(); return; }
+    if (act === "open-course-memo") { openCourseMemoSheet(t.getAttribute("data-course")); return; }
+    if (act === "save-course-memo") { saveCourseMemo(); return; }
     if (act === "close-sheet") { closeSheet(); return; }
     if (act === "ask-delete") { openConfirmDelete(t.getAttribute("data-id")); return; }
     if (act === "cancel-delete") { openHabitEditor(t.getAttribute("data-id") || pendingDeleteId); return; }
