@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T18:44:11+09:00",
+  "generatedAt": "2026-11-19T01:14:20+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -184,8 +184,8 @@
       "dueLabel": "11/17(火) 23:30",
       "dueNote": null,
       "inClass": false,
-      "sourceStatus": "open",
-      "sourceStatusLabel": "未提出（11/13 8:45公開。感想必須・質問任意）"
+      "sourceStatus": "unknown",
+      "sourceStatusLabel": "出し忘れ・締切超過（11/19 紳さん申告。遅れ提出できるかKULMSで要確認）"
     },
     {
       "id": "1748bc2ed664",
@@ -195,8 +195,8 @@
       "dueLabel": "11/18(水) 23:59",
       "dueNote": null,
       "inClass": false,
-      "sourceStatus": "open",
-      "sourceStatusLabel": "未提出"
+      "sourceStatus": "submitted",
+      "sourceStatusLabel": "提出済み（11/19 紳さん申告）"
     },
     {
       "id": "f24511c58363",
@@ -208,6 +208,17 @@
       "inClass": false,
       "sourceStatus": "open",
       "sourceStatusLabel": "未提出（11/13確認で公開・受験可能）"
+    },
+    {
+      "id": "d16d000fcbb4",
+      "course": "運動科学Ⅰ",
+      "title": "授業内テスト（来週と申告）",
+      "due": "2026-11-25T16:30:00+09:00",
+      "dueLabel": "11/25(水) 4限 授業内（確定）",
+      "dueNote": "4限 授業内（確定）",
+      "inClass": true,
+      "sourceStatus": "unknown",
+      "sourceStatusLabel": "未受験"
     },
     {
       "id": "2ccf12ded4be",
