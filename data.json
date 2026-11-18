@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T01:14:20+09:00",
+  "generatedAt": "2026-11-19T01:26:48+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -289,78 +289,6 @@
   ],
   "events": [
     {
-      "id": "1i68rtn3ajhmss7o1ke22de57o_20261116T041500Z",
-      "title": "[授業] 鉄筋コンクリート構造Ⅱ（RC）（月3）",
-      "start": "2026-11-16T13:15:00+09:00",
-      "end": "2026-11-16T14:45:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "6et1maklql6eubpj40gdin8s38",
-      "title": "大智さん（ブルベ2回）誕生日",
-      "start": "2026-11-17",
-      "end": "2026-11-18",
-      "allDay": true,
-      "location": null,
-      "kind": "birthday"
-    },
-    {
-      "id": "ufml313g2boj72531bhoocepfg_20261116T234500Z",
-      "title": "[授業] 建築生産Ⅱ（火1）",
-      "start": "2026-11-17T08:45:00+09:00",
-      "end": "2026-11-17T10:15:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "b4brfnvqu0f7lnt61slag8caeg_20261117T013000Z",
-      "title": "[授業] 建築温熱環境設計（火2）",
-      "start": "2026-11-17T10:30:00+09:00",
-      "end": "2026-11-17T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "4js835i19163ps84dplrt8krc4_20261117T060000Z",
-      "title": "ゼミ",
-      "start": "2026-11-17T15:00:00+09:00",
-      "end": "2026-11-17T16:00:00+09:00",
-      "allDay": false,
-      "location": "京都大学 桂キャンパス",
-      "kind": "seminar"
-    },
-    {
-      "id": "0kiu9f9cil38ftjd1e7a3hjrfo_20261117T060000Z",
-      "title": "[授業] 微分積分学続論Ⅱ－微分方程式（火4）",
-      "start": "2026-11-17T15:00:00+09:00",
-      "end": "2026-11-17T16:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "ta6lo3ggb2k2dvmra4vt7nurak_20261117T141500Z",
-      "title": "[授業] 〆 統計入門 リアクションペーパー",
-      "start": "2026-11-17T23:15:00+09:00",
-      "end": "2026-11-17T23:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
-    {
-      "id": "9mc9p7o5gjm5topk9qi306qbvc_20261118T013000Z",
-      "title": "[授業] 建築構造解析（水2）",
-      "start": "2026-11-18T10:30:00+09:00",
-      "end": "2026-11-18T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
       "id": "gh7g9mbem547e5f9rvi6m5l82o_20261118T041500Z",
       "title": "[授業] 耐震構造（水3）",
       "start": "2026-11-18T13:15:00+09:00",
@@ -494,6 +422,15 @@
       "allDay": false,
       "location": null,
       "kind": "class"
+    },
+    {
+      "id": "i24pkkkf7cnlaab5tpd9ufhhr0",
+      "title": "〆 運動科学Ⅰ テスト（授業内）",
+      "start": "2026-11-25T15:00:00+09:00",
+      "end": "2026-11-25T16:30:00+09:00",
+      "allDay": false,
+      "location": null,
+      "kind": "deadline"
     },
     {
       "id": "tbcqsup7hhrn94cri3skc585r0_20261125T060000Z",
