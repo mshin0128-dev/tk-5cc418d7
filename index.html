@@ -89,47 +89,56 @@
     }
     html.kb-open #app { padding-bottom: 16px; }
     .appbar {
-      padding: calc(16px + var(--safe-t)) 16px 18px;
-      background: linear-gradient(135deg, var(--header-1), var(--header-2));
-      color: #fff;
-      border-radius: 0 0 20px 20px;
-      box-shadow: var(--shadow);
+      padding: calc(10px + var(--safe-t)) 14px 10px;
+      background: var(--bg);
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
       min-width: 0;
     }
+    .appbar-spacer { flex: none; width: 38px; }
     .appbar-row {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       min-width: 0;
     }
     .appbar-text { flex: 1; min-width: 0; }
+    .appbar-text { flex: 1; min-width: 0; text-align: center; }
     .appbar h1 {
       margin: 0;
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      line-height: 1.25;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     .appbar p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      opacity: 0.9;
+      margin: 2px 0 0;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--accent);
       overflow-wrap: anywhere;
     }
     .appbar .icon-btn {
       flex: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
-      color: #fff;
-      background: rgba(255,255,255,0.22);
+      color: var(--sub);
+      background: var(--card);
       box-shadow: none;
+      border: 1px solid var(--border);
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
     }
-    .appbar .icon-btn svg { width: 20px; height: 20px; }
+    .appbar .icon-btn svg { width: 18px; height: 18px; }
     #main { padding: 16px; overflow-x: hidden; min-width: 0; }
     .tab-page { display: none; min-width: 0; }
     .tab-page.active { display: block; }
@@ -583,7 +592,7 @@
     html.kb-open .sheet { padding-bottom: 16px; max-height: min(70dvh, 70vh); }
     .sheet h3 { margin: 0 0 12px; font-size: 18px; font-weight: 700; }
     label.fld, .fld { display: block; font-size: 13px; font-weight: 700; color: var(--sub); margin: 12px 0 6px; }
-    input[type="text"] {
+    input[type="text"], input[type="datetime-local"] {
       width: 100%;
       min-height: 44px;
       border: 1px solid var(--border);
@@ -593,7 +602,7 @@
       font-size: 16px;
       outline: none;
     }
-    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]:focus, input[type="datetime-local"]:focus { border-color: var(--accent); }
     textarea {
       width: 100%;
       min-height: 120px;
@@ -717,6 +726,7 @@
   <div id="app">
     <header class="appbar">
       <div class="appbar-row">
+        <span class="appbar-spacer" aria-hidden="true"></span>
         <div class="appbar-text">
           <h1>日々のタスク</h1>
           <p id="appbarSub">習慣・予定・課題</p>
@@ -788,10 +798,12 @@
   var memoEditingId = null;
   var courseMemoEditingKey = null;
   var pendingDeleteId = null;
+  var editingAssignId = null;
+  var pendingDeleteAssignId = null;
   var formDraft = null;
 
   function loadState() {
-    var empty = { habits: [], checks: {}, assignmentDone: {}, themePref: "system", courseMemos: {}, courseMemoTouched: {} };
+    var empty = { habits: [], checks: {}, assignmentDone: {}, assignmentOverrides: {}, assignmentDeleted: {}, themePref: "system", courseMemos: {}, courseMemoTouched: {} };
     try {
       var raw = localStorage.getItem(STORE_KEY);
       if (!raw) return empty;
@@ -803,6 +815,8 @@
       });
       if (!s.checks || typeof s.checks !== "object") s.checks = {};
       if (!s.assignmentDone || typeof s.assignmentDone !== "object") s.assignmentDone = {};
+      if (!s.assignmentOverrides || typeof s.assignmentOverrides !== "object") s.assignmentOverrides = {};
+      if (!s.assignmentDeleted || typeof s.assignmentDeleted !== "object") s.assignmentDeleted = {};
       if (!s.themePref) s.themePref = "system";
       if (!s.courseMemos || typeof s.courseMemos !== "object") s.courseMemos = {};
       if (!s.courseMemoTouched || typeof s.courseMemoTouched !== "object") s.courseMemoTouched = {};
@@ -1416,6 +1430,9 @@
       html += '<div class="habit-memo">' + linkifyMemo(memo) + "</div>";
     }
     html += "</div>";
+    if (!compact && a.id) {
+      html += '<button type="button" class="edit-btn" data-act="edit-assign" data-id="' + escapeHtml(a.id) + '">編集</button>';
+    }
     if (key) {
       html += '<button type="button" class="memo-btn' + (memo ? " is-filled" : "") + '" data-act="open-course-memo" data-course="' + escapeHtml(key) + '" aria-label="メモ">' + MEMO_SVG + "</button>";
     }
@@ -1510,7 +1527,7 @@
     html += '<p class="foot-note">課題は授業管理の記録、予定はカレンダーの控えから読み込んでいます。';
     if (DATA.generatedAt) html += " データの作成: " + escapeHtml(formatDateTime(DATA.generatedAt)) + "（日本時間）。";
     if (src.assignmentsNote) html += " 課題表の注記: " + escapeHtml(src.assignmentsNote) + "。";
-    html += " 完了チェックはこの端末にだけ保存されます。</p>";
+    html += " 完了チェックと課題の編集・削除はこの端末にだけ保存されます。</p>";
     el.innerHTML = html;
   }
 
@@ -1564,6 +1581,98 @@
     html += '<button type="button" class="primary" data-act="save-habit">保存</button></div>';
     if (h) html += '<div class="btn-row"><button type="button" class="danger-btn" data-act="ask-delete" data-id="' + escapeHtml(h.id) + '">この習慣を削除</button></div>';
     openSheet(html, "habit");
+  }
+
+  function applyAssignmentOverrides() {
+    if (!DATA || !Array.isArray(DATA.assignments)) return;
+    DATA.assignments = DATA.assignments.filter(function (a) {
+      return !(a && a.id && state.assignmentDeleted[a.id]);
+    });
+    DATA.assignments.forEach(function (a) {
+      var ov = a && a.id ? state.assignmentOverrides[a.id] : null;
+      if (!ov) return;
+      if (typeof ov.title === "string") a.title = ov.title;
+      if (typeof ov.course === "string") a.course = ov.course;
+      if ("due" in ov) a.due = ov.due;
+    });
+  }
+
+  function findAssignment(id) {
+    return (DATA.assignments || []).filter(function (a) { return a.id === id; })[0] || null;
+  }
+
+  function toLocalInputValue(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    function p2(n) { return ("0" + n).slice(-2); }
+    return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + "T" + p2(d.getHours()) + ":" + p2(d.getMinutes());
+  }
+
+  function openAssignmentEditor(id) {
+    var a = findAssignment(id);
+    if (!a) return;
+    editingAssignId = id;
+    var html = '<h3 id="sheetTitle">課題を編集</h3>';
+    html += '<label class="fld" for="assignTitle">タイトル</label>';
+    html += '<input type="text" id="assignTitle" maxlength="120" value="' + escapeHtml(a.title || "") + '" enterkeyhint="done">';
+    html += '<label class="fld" for="assignCourse">科目</label>';
+    html += '<input type="text" id="assignCourse" maxlength="60" value="' + escapeHtml(a.course || "") + '" enterkeyhint="done">';
+    html += '<label class="fld" for="assignDue">締切</label>';
+    html += '<input type="datetime-local" id="assignDue" value="' + toLocalInputValue(a.due) + '">';
+    html += '<p class="row-meta" style="margin:10px 0 0">編集と削除はこの端末にだけ保存されます（元の記録からは消えません）。</p>';
+    html += '<div class="btn-row"><button type="button" class="secondary" data-act="close-sheet">やめる</button>';
+    html += '<button type="button" class="primary" data-act="save-assign">保存</button></div>';
+    html += '<div class="btn-row"><button type="button" class="danger-btn" data-act="ask-delete-assign" data-id="' + escapeHtml(a.id) + '">この課題を削除</button></div>';
+    openSheet(html, "assign");
+    var focus = document.getElementById("assignTitle");
+    if (focus) setTimeout(function () { focus.focus(); }, 50);
+  }
+
+  function saveAssignment() {
+    var a = findAssignment(editingAssignId);
+    if (!a) { closeSheet(); return; }
+    var titleEl = document.getElementById("assignTitle");
+    var title = (titleEl && titleEl.value || "").trim();
+    if (!title) { toast("タイトルを入力してください"); if (titleEl) titleEl.focus(); return; }
+    var courseEl = document.getElementById("assignCourse");
+    var course = (courseEl && courseEl.value || "").trim();
+    var dueEl = document.getElementById("assignDue");
+    var due = null;
+    if (dueEl && dueEl.value) {
+      var d = new Date(dueEl.value);
+      if (!isNaN(d.getTime())) due = d.toISOString();
+    }
+    state.assignmentOverrides[a.id] = { title: title, course: course, due: due };
+    a.title = title;
+    a.course = course;
+    a.due = due;
+    saveState();
+    closeSheet();
+    render();
+    toast("保存しました");
+  }
+
+  function openConfirmDeleteAssign(id) {
+    var a = findAssignment(id);
+    if (!a) return;
+    pendingDeleteAssignId = id;
+    var html = '<h3 id="sheetTitle">削除しますか？</h3>';
+    html += "<p class=\"row-meta\" style=\"margin:0 0 12px\">「" + escapeHtml(a.title || "この課題") + "」をこの端末で非表示にします。元の記録からは消えません。</p>";
+    html += '<div class="btn-row"><button type="button" class="secondary" data-act="cancel-delete-assign">やめる</button>';
+    html += '<button type="button" class="danger-btn" data-act="confirm-delete-assign">削除する</button></div>';
+    openSheet(html, "confirm-assign");
+  }
+
+  function deleteAssignment(id) {
+    if (!id) return;
+    state.assignmentDeleted[id] = new Date().toISOString();
+    delete state.assignmentOverrides[id];
+    DATA.assignments = (DATA.assignments || []).filter(function (a) { return a.id !== id; });
+    saveState();
+    closeSheet();
+    render();
+    toast("削除しました");
   }
 
   function openConfirmDelete(id) {
@@ -1747,6 +1856,11 @@
     if (act === "add-habit") { openHabitEditor(null); return; }
     if (act === "edit-habit") { openHabitEditor(t.getAttribute("data-id")); return; }
     if (act === "save-habit") { saveHabit(); return; }
+    if (act === "edit-assign") { openAssignmentEditor(t.getAttribute("data-id")); return; }
+    if (act === "save-assign") { saveAssignment(); return; }
+    if (act === "ask-delete-assign") { openConfirmDeleteAssign(t.getAttribute("data-id")); return; }
+    if (act === "cancel-delete-assign") { openAssignmentEditor(pendingDeleteAssignId); return; }
+    if (act === "confirm-delete-assign") { deleteAssignment(pendingDeleteAssignId); return; }
     if (act === "open-memo") { openMemoSheet(t.getAttribute("data-id")); return; }
     if (act === "save-memo") { saveMemo(); return; }
     if (act === "open-course-memo") { openCourseMemoSheet(t.getAttribute("data-course")); return; }
@@ -2265,6 +2379,7 @@
     return res.json();
   }).then(function (d) {
     DATA = d || DATA;
+    applyAssignmentOverrides();
     dataError = "";
     render();
   }).catch(function () {
