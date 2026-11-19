@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T01:26:48+09:00",
+  "generatedAt": "2026-11-20T06:48:42+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -288,51 +288,6 @@
     }
   ],
   "events": [
-    {
-      "id": "gh7g9mbem547e5f9rvi6m5l82o_20261118T041500Z",
-      "title": "[授業] 耐震構造（水3）",
-      "start": "2026-11-18T13:15:00+09:00",
-      "end": "2026-11-18T14:45:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "tbcqsup7hhrn94cri3skc585r0_20261118T060000Z",
-      "title": "[授業] 運動科学Ⅰ（水4）",
-      "start": "2026-11-18T15:00:00+09:00",
-      "end": "2026-11-18T16:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "fdv2fv5m1ennff14ku26b7bvd4_20261118T144400Z",
-      "title": "[授業] 〆 建築生産Ⅱ Googleフォーム",
-      "start": "2026-11-18T23:44:00+09:00",
-      "end": "2026-11-18T23:59:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
-    {
-      "id": "blrjovlpp13tjd38s36enu247c_20261118T234500Z",
-      "title": "[授業] スポーツ実習ⅠB［テニス］（木1）",
-      "start": "2026-11-19T08:45:00+09:00",
-      "end": "2026-11-19T10:15:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "ttj2o639g1qci7v5ut8ji5ib9k_20261119T013000Z",
-      "title": "[授業] 証券投資と企業活動（木2）",
-      "start": "2026-11-19T10:30:00+09:00",
-      "end": "2026-11-19T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
     {
       "id": "5oiv9l2p3a3sirvltm5biunmic",
       "title": "一蘭 バイト",
