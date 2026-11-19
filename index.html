@@ -712,6 +712,9 @@
     }
     #page-today.week-anim { animation: weekSlide 200ms ease-out; }
 
+    .date-group-label { display: flex; align-items: baseline; gap: 8px; margin: 14px 2px 6px; font-size: 13px; font-weight: 800; color: var(--text); }
+    .date-group-label .sub { font-size: 11px; font-weight: 600; color: var(--faint); }
+    .section-h + .date-group-label, .filter-row + .date-group-label { margin-top: 2px; }
     .habit-cal { padding: 2px 14px 12px 60px; }
     .habit-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; max-width: 300px; }
     .habit-cal-head { margin-bottom: 2px; }
@@ -1432,11 +1435,35 @@
     }
     html += "</div>";
 
-    html += '<div class="section-h"><h2>締切が近い課題</h2><span class="sub">14日以内</span></div><div class="card">';
-    if (!asg.length) html += '<div class="empty">直近の未提出課題はありません。</div>';
-    asg.forEach(function (a) { html += assignmentRow(a, true, day); });
-    html += "</div>";
+    html += '<div class="section-h"><h2>締切が近い課題</h2><span class="sub">14日以内</span></div>';
+    if (!asg.length) html += '<div class="card"><div class="empty">直近の未提出課題はありません。</div></div>';
+    else html += assignmentGroupsHtml(asg, true, day);
     el.innerHTML = html;
+  }
+
+  function assignmentGroupsHtml(list, compact, origin) {
+    var groups = [];
+    var byKey = {};
+    list.forEach(function (a) {
+      var k = dueYmd(a) || "none";
+      if (!byKey[k]) { byKey[k] = { key: k, items: [] }; groups.push(byKey[k]); }
+      byKey[k].items.push(a);
+    });
+    var html = "";
+    groups.forEach(function (g) {
+      var label;
+      if (g.key === "none") label = "日付未定";
+      else {
+        label = formatMonthDay(g.key);
+        var urg = dueUrgency(g.items[0], origin);
+        if (urg && urg.label) label += " ・ " + urg.label;
+      }
+      html += '<div class="date-group-label">' + escapeHtml(label) + '<span class="sub">' + g.items.length + "件</span></div>";
+      html += '<div class="card">';
+      g.items.forEach(function (a) { html += assignmentRow(a, compact, origin); });
+      html += "</div>";
+    });
+    return html;
   }
 
   function assignmentRow(a, compact, origin) {
@@ -1557,11 +1584,9 @@
     html += '<button type="button" class="seg' + (taskFilter === "open" ? " on" : "") + '" data-act="task-filter" data-filter="open">これから</button>';
     html += '<button type="button" class="seg' + (taskFilter === "all" ? " on" : "") + '" data-act="task-filter" data-filter="all">全部</button>';
     html += "</div>";
-    html += '<div class="card">';
-    if (!all.length) html += '<div class="empty">課題データがまだありません。</div>';
-    else if (!list.length) html += '<div class="empty">未提出の課題はありません。</div>';
-    list.forEach(function (a) { html += assignmentRow(a, false); });
-    html += "</div>";
+    if (!all.length) html += '<div class="card"><div class="empty">課題データがまだありません。</div></div>';
+    else if (!list.length) html += '<div class="card"><div class="empty">未提出の課題はありません。</div></div>';
+    else html += assignmentGroupsHtml(list, false, todayYmd());
     var src = DATA.sources || {};
     html += '<p class="foot-note">課題は授業管理の記録、予定はカレンダーの控えから読み込んでいます。';
     if (DATA.generatedAt) html += " データの作成: " + escapeHtml(formatDateTime(DATA.generatedAt)) + "（日本時間）。";
