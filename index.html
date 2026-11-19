@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="タスク">
-  <meta name="theme-color" content="#0c7a6b">
+  <meta name="theme-color" content="#0A84FF">
   <meta name="color-scheme" content="light dark">
   <meta name="format-detection" content="telephone=no">
   <title>日々のタスク</title>
@@ -15,50 +15,50 @@
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <style>
     :root, [data-theme="light"] {
-      --accent: #0c7a6b;
-      --accent2: #0a6559;
-      --header-1: #0b6f63;
-      --header-2: #1aa38c;
-      --bg: #F0F5F3;
+      --accent: #0A84FF;
+      --accent2: #0A6FE0;
+      --header-1: #35A7FF;
+      --header-2: #0A84FF;
+      --bg: #F2F2F7;
       --card: #FFFFFF;
-      --text: #1A2A26;
-      --sub: #5A6D68;
-      --border: #D4E0DC;
+      --text: #1C1C1E;
+      --sub: #6E6E73;
+      --border: rgba(0,0,0,0.10);
       --tabbar-bg: #FFFFFF;
-      --tabbar-border: #D4E0DC;
-      --tab-pill-bg: #E8EEEC;
-      --soft: #E8F4F0;
-      --shadow: 0 8px 24px rgba(20, 36, 33, 0.08);
-      --danger: #D1456B;
-      --danger-soft: #FDECEE;
+      --tabbar-border: rgba(0,0,0,0.08);
+      --tab-pill-bg: rgba(10,132,255,0.12);
+      --soft: rgba(10,132,255,0.10);
+      --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.05);
+      --danger: #E5372C;
+      --danger-soft: #FFF0EF;
       --warn: #A3660A;
       --warn-soft: #FFF3D6;
-      --ok: #0c7a6b;
+      --ok: #1DA851;
       --safe-t: env(safe-area-inset-top, 0px);
       --safe-b: env(safe-area-inset-bottom, 0px);
       --safe-l: env(safe-area-inset-left, 0px);
       --safe-r: env(safe-area-inset-right, 0px);
     }
     html[data-theme="dark"] {
-      --accent: #3dbaa8;
-      --accent2: #7ad4c6;
-      --header-1: #0a5c52;
-      --header-2: #0c7a6b;
-      --bg: #101816;
-      --card: #1A2422;
-      --text: #E8F2EF;
-      --sub: #9AADA8;
+      --accent: #0A84FF;
+      --accent2: #35A7FF;
+      --header-1: #35A7FF;
+      --header-2: #0A84FF;
+      --bg: #000000;
+      --card: #1C1E22;
+      --text: #F2F2F7;
+      --sub: #98989F;
       --border: rgba(255,255,255,0.10);
-      --tabbar-bg: #1A2422;
+      --tabbar-bg: #1C1E22;
       --tabbar-border: rgba(255,255,255,0.10);
-      --tab-pill-bg: #25312E;
-      --soft: #163832;
+      --tab-pill-bg: rgba(10,132,255,0.18);
+      --soft: rgba(10,132,255,0.16);
       --shadow: 0 8px 24px rgba(0,0,0,0.4);
-      --danger: #E78098;
-      --danger-soft: #3A1C1A;
+      --danger: #FF453A;
+      --danger-soft: rgba(255,69,58,0.14);
       --warn: #E7B169;
       --warn-soft: #3A2E14;
-      --ok: #3dbaa8;
+      --ok: #30D158;
       color-scheme: dark;
     }
     * { box-sizing: border-box; min-width: 0; }
@@ -176,7 +176,7 @@
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 22px;
       box-shadow: var(--shadow);
       overflow: hidden;
       min-width: 0;
@@ -274,6 +274,7 @@
       background: linear-gradient(135deg, var(--header-1), var(--header-2));
       color: #fff;
       border: none;
+      box-shadow: 0 6px 18px rgba(10,132,255,0.35);
     }
     .secondary { background: var(--card); }
     .danger-btn { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
@@ -701,6 +702,15 @@
       to { transform: translateX(0); opacity: 1; }
     }
     #page-today.week-anim { animation: weekSlide 200ms ease-out; }
+
+  /* ==== UI統一（筋トレアプリ準拠 / UI Arc） ==== */
+  button { transition: transform .15s cubic-bezier(.2,.7,.3,1), background .18s cubic-bezier(.2,.7,.3,1), color .18s cubic-bezier(.2,.7,.3,1); }
+  button:active { transform: scale(0.97); }
+  button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    button:active { transform: none; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
 </style>
 </head>
 <body>
@@ -944,7 +954,7 @@
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
     document.documentElement.setAttribute("data-theme-pref", pref);
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", dark ? "#0a5c52" : "#0b6f63");
+    if (meta) meta.setAttribute("content", dark ? "#000000" : "#0A84FF");
   }
 
   function cycleTheme() {
