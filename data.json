@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T11:31:37+09:00",
+  "generatedAt": "2026-11-21T06:45:35+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -288,24 +288,6 @@
     }
   ],
   "events": [
-    {
-      "id": "5oiv9l2p3a3sirvltm5biunmic",
-      "title": "一蘭 バイト",
-      "start": "2026-11-19T18:00:00+09:00",
-      "end": "2026-11-19T23:00:00+09:00",
-      "allDay": false,
-      "location": "一蘭",
-      "kind": "work"
-    },
-    {
-      "id": "l5jomau1bb1vin4hmvfhm95t60_20261119T231500Z",
-      "title": "[授業] 〆 統計入門 クイズ",
-      "start": "2026-11-20T08:15:00+09:00",
-      "end": "2026-11-20T08:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
     {
       "id": "c8a43i2thsdkqjpm3sql9kgl6c",
       "title": "一蘭 バイト",
