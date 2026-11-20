@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T06:48:42+09:00",
+  "generatedAt": "2026-11-20T11:31:37+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -206,8 +206,8 @@
       "dueLabel": "11/20(金) 8:30",
       "dueNote": null,
       "inClass": false,
-      "sourceStatus": "open",
-      "sourceStatusLabel": "未提出（11/13確認で公開・受験可能）"
+      "sourceStatus": "submitted",
+      "sourceStatusLabel": "提出済み（11/20申告）"
     },
     {
       "id": "d16d000fcbb4",
