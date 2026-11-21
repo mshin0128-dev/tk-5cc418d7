@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T06:45:35+09:00",
+  "generatedAt": "2026-11-22T06:50:22+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -288,15 +288,6 @@
     }
   ],
   "events": [
-    {
-      "id": "c8a43i2thsdkqjpm3sql9kgl6c",
-      "title": "一蘭 バイト",
-      "start": "2026-11-20T22:00:00+09:00",
-      "end": "2026-11-21T06:00:00+09:00",
-      "allDay": false,
-      "location": "一蘭",
-      "kind": "work"
-    },
     {
       "id": "ufml313g2boj72531bhoocepfg_20261123T234500Z",
       "title": "[授業] 建築生産Ⅱ（火1）",
