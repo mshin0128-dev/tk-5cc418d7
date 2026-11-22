@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-22T06:50:22+09:00",
+  "generatedAt": "2026-11-23T08:23:35+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -185,7 +185,18 @@
       "dueNote": null,
       "inClass": false,
       "sourceStatus": "unknown",
-      "sourceStatusLabel": "出し忘れ・締切超過（11/19 紳さん申告。遅れ提出できるかKULMSで要確認）"
+      "sourceStatusLabel": "出し忘れ・締切超過（11/23 KULMS確認: CLOSED・遅延提出なし。1点分。出すなら植嶋先生に相談するしかない）"
+    },
+    {
+      "id": "f6b338c12469",
+      "course": "RC",
+      "title": "演習課題７－クリープとリラクセーション",
+      "due": "2026-11-23T13:15:00+09:00",
+      "dueLabel": "11/23(月) 13:15",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "【未提出】（11/23 8:22 KULMSで確認、OPEN・未開始）"
     },
     {
       "id": "1748bc2ed664",
