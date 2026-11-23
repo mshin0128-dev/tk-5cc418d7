@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T08:23:35+09:00",
+  "generatedAt": "2026-11-23T12:26:44+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -195,8 +195,8 @@
       "dueLabel": "11/23(月) 13:15",
       "dueNote": null,
       "inClass": false,
-      "sourceStatus": "open",
-      "sourceStatusLabel": "【未提出】（11/23 8:22 KULMSで確認、OPEN・未開始）"
+      "sourceStatus": "submitted",
+      "sourceStatusLabel": "提出済み（KULMS 11/23 12:26）"
     },
     {
       "id": "1748bc2ed664",
