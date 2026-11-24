@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T18:45:15+09:00",
+  "generatedAt": "2026-11-25T06:42:54+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -299,33 +299,6 @@
     }
   ],
   "events": [
-    {
-      "id": "ru5tau6fjje6i7r1o0c2iv6ols",
-      "title": "〆 RC 演習課題7（クリープとリラクセーション）",
-      "start": "2026-11-23T13:00:00+09:00",
-      "end": "2026-11-23T13:15:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
-    {
-      "id": "ufml313g2boj72531bhoocepfg_20261123T234500Z",
-      "title": "[授業] 建築生産Ⅱ（火1）",
-      "start": "2026-11-24T08:45:00+09:00",
-      "end": "2026-11-24T10:15:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "b4brfnvqu0f7lnt61slag8caeg_20261124T013000Z",
-      "title": "[授業] 建築温熱環境設計（火2）",
-      "start": "2026-11-24T10:30:00+09:00",
-      "end": "2026-11-24T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
     {
       "id": "4js835i19163ps84dplrt8krc4_20261124T060000Z",
       "title": "ゼミ",
