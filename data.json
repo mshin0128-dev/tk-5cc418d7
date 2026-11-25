@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T16:44:17+09:00",
+  "generatedAt": "2026-11-25T16:44:39+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -230,17 +230,6 @@
       "inClass": true,
       "sourceStatus": "submitted",
       "sourceStatusLabel": "受験済み（紳さん申告 11/25 16:43、自己採点9/10くらい）"
-    },
-    {
-      "id": "2ccf12ded4be",
-      "course": "建築生産Ⅱ",
-      "title": "質問・コメント票フォーム（11/24分）",
-      "due": "2026-11-25T23:59:00+09:00",
-      "dueLabel": "11/25(水) 23:59",
-      "dueNote": null,
-      "inClass": false,
-      "sourceStatus": "open",
-      "sourceStatusLabel": "未提出"
     },
     {
       "id": "900a0d96692d",
