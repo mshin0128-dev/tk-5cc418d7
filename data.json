@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T06:42:54+09:00",
+  "generatedAt": "2026-11-25T16:44:17+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -221,15 +221,15 @@
       "sourceStatusLabel": "提出済み（11/20申告）"
     },
     {
-      "id": "d16d000fcbb4",
+      "id": "b3d26bfd6fe3",
       "course": "運動科学Ⅰ",
-      "title": "授業内テスト（来週と申告）",
+      "title": "授業内テスト（テスト・クイズ2回目）",
       "due": "2026-11-25T16:30:00+09:00",
       "dueLabel": "11/25(水) 4限 授業内（確定）",
       "dueNote": "4限 授業内（確定）",
       "inClass": true,
-      "sourceStatus": "unknown",
-      "sourceStatusLabel": "未受験"
+      "sourceStatus": "submitted",
+      "sourceStatusLabel": "受験済み（紳さん申告 11/25 16:43、自己採点9/10くらい）"
     },
     {
       "id": "2ccf12ded4be",
