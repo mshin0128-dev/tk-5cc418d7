@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25T18:44:27+09:00",
+  "generatedAt": "2026-11-26T06:49:45+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -288,51 +288,6 @@
     }
   ],
   "events": [
-    {
-      "id": "4js835i19163ps84dplrt8krc4_20261124T060000Z",
-      "title": "ゼミ",
-      "start": "2026-11-24T15:00:00+09:00",
-      "end": "2026-11-24T16:00:00+09:00",
-      "allDay": false,
-      "location": "京都大学 桂キャンパス",
-      "kind": "seminar"
-    },
-    {
-      "id": "0kiu9f9cil38ftjd1e7a3hjrfo_20261124T060000Z",
-      "title": "[授業] 微分積分学続論Ⅱ－微分方程式（火4）",
-      "start": "2026-11-24T15:00:00+09:00",
-      "end": "2026-11-24T16:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "r4ptj6k5b24tkudembaaaglk78",
-      "title": "一蘭 バイト",
-      "start": "2026-11-24T23:00:00+09:00",
-      "end": "2026-11-25T05:00:00+09:00",
-      "allDay": false,
-      "location": "一蘭",
-      "kind": "work"
-    },
-    {
-      "id": "ta6lo3ggb2k2dvmra4vt7nurak_20261124T141500Z",
-      "title": "[授業] 〆 統計入門 リアクションペーパー",
-      "start": "2026-11-24T23:15:00+09:00",
-      "end": "2026-11-24T23:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
-    {
-      "id": "9mc9p7o5gjm5topk9qi306qbvc_20261125T013000Z",
-      "title": "[授業] 建築構造解析（水2）",
-      "start": "2026-11-25T10:30:00+09:00",
-      "end": "2026-11-25T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
     {
       "id": "gh7g9mbem547e5f9rvi6m5l82o_20261125T041500Z",
       "title": "[授業] 耐震構造（水3）",
