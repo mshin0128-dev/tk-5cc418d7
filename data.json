@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T12:27:45+09:00",
+  "generatedAt": "2026-11-27T06:46:55+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
@@ -299,69 +299,6 @@
     }
   ],
   "events": [
-    {
-      "id": "gh7g9mbem547e5f9rvi6m5l82o_20261125T041500Z",
-      "title": "[授業] 耐震構造（水3）",
-      "start": "2026-11-25T13:15:00+09:00",
-      "end": "2026-11-25T14:45:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "i24pkkkf7cnlaab5tpd9ufhhr0",
-      "title": "〆 運動科学Ⅰ テスト（授業内）",
-      "start": "2026-11-25T15:00:00+09:00",
-      "end": "2026-11-25T16:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
-    {
-      "id": "tbcqsup7hhrn94cri3skc585r0_20261125T060000Z",
-      "title": "[授業] 運動科学Ⅰ（水4）",
-      "start": "2026-11-25T15:00:00+09:00",
-      "end": "2026-11-25T16:30:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "or58316prunohb55d0eqpnbok4",
-      "title": "一蘭 バイト",
-      "start": "2026-11-25T19:00:00+09:00",
-      "end": "2026-11-25T23:00:00+09:00",
-      "allDay": false,
-      "location": "一蘭",
-      "kind": "work"
-    },
-    {
-      "id": "fdv2fv5m1ennff14ku26b7bvd4_20261125T144400Z",
-      "title": "[授業] 〆 建築生産Ⅱ Googleフォーム",
-      "start": "2026-11-25T23:44:00+09:00",
-      "end": "2026-11-25T23:59:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "deadline"
-    },
-    {
-      "id": "blrjovlpp13tjd38s36enu247c_20261125T234500Z",
-      "title": "[授業] スポーツ実習ⅠB［テニス］（木1）",
-      "start": "2026-11-26T08:45:00+09:00",
-      "end": "2026-11-26T10:15:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
-    {
-      "id": "ttj2o639g1qci7v5ut8ji5ib9k_20261126T013000Z",
-      "title": "[授業] 証券投資と企業活動（木2）",
-      "start": "2026-11-26T10:30:00+09:00",
-      "end": "2026-11-26T12:00:00+09:00",
-      "allDay": false,
-      "location": null,
-      "kind": "class"
-    },
     {
       "id": "l5jomau1bb1vin4hmvfhm95t60_20261126T231500Z",
       "title": "[授業] 〆 統計入門 クイズ",
