@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-26T06:49:45+09:00",
+  "generatedAt": "2026-11-26T12:27:45+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
-    "assignmentsNote": "11/13 12:16 KULMS確認",
+    "assignmentsNote": "11/26 12:27 KULMS確認",
     "calendar": "Google Calendar primary の読み取り専用スナップショット（【タスク】calendar_snapshot.json）",
     "calendarWindow": {
       "start": "2026-11-13T12:00:00+09:00",
@@ -265,6 +265,17 @@
       "sourceStatusLabel": "未提出"
     },
     {
+      "id": "a2274afb27d2",
+      "course": "建築温熱環境設計",
+      "title": "レポート課題（担当：小椋、KULMS課題）",
+      "due": "2026-12-03T12:00:00+09:00",
+      "dueLabel": "12/3(木) 12:00",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出（11/26 KULMS確認で新規・OPEN・未開始。受付終了は12/4(金) 17:00）"
+    },
+    {
       "id": "79cdc6723069",
       "course": "統計入門",
       "title": "中間レポート（KULMS課題）",
@@ -273,7 +284,7 @@
       "dueNote": null,
       "inClass": false,
       "sourceStatus": "open",
-      "sourceStatusLabel": "未提出（11/13 8:45公開、OPEN。PDF提出・再提出可）"
+      "sourceStatusLabel": "未提出（11/13 8:45公開、OPEN。11/26 KULMSで締切12/4 23:30確定・受付終了23:35。PDF提出・再提出可）"
     },
     {
       "id": "798366cd6b41",
