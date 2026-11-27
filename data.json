@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-27T06:46:55+09:00",
+  "generatedAt": "2026-11-27T16:24:15+09:00",
   "timezone": "Asia/Tokyo",
   "sources": {
     "assignments": "/home/box/courses/2026-kouki.md",
-    "assignmentsNote": "11/26 12:27 KULMS確認",
+    "assignmentsNote": "11/27 16:23 KULMS確認",
     "calendar": "Google Calendar primary の読み取り専用スナップショット（【タスク】calendar_snapshot.json）",
     "calendarWindow": {
       "start": "2026-11-13T12:00:00+09:00",
@@ -252,6 +252,17 @@
       "inClass": false,
       "sourceStatus": "open",
       "sourceStatusLabel": "未提出"
+    },
+    {
+      "id": "3ddc3d6b0f31",
+      "course": "統計入門",
+      "title": "第7回リアクションペーパー（KULMS課題）",
+      "due": "2026-12-01T23:30:00+09:00",
+      "dueLabel": "12/1(火) 23:30",
+      "dueNote": null,
+      "inClass": false,
+      "sourceStatus": "open",
+      "sourceStatusLabel": "未提出（11/27 KULMS確認で新規・OPEN。受付終了23:35）"
     },
     {
       "id": "2bf4f7d93e33",
